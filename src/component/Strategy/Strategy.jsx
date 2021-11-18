@@ -1,9 +1,10 @@
-import React, {useRef} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
+import {ADDRSERVEUR,ADDRSERVEURGAME} from "../../App";
 
-const allStrat=["c all","l all","reverse"]
 
 export default function Strategy(){
     const selectRef = useRef();
+
     const handleClick = ()=>{
         console.log(selectRef.current.value)
         //TODO ici on fait le fetch post pour envoyer un changement de strat et mettre tous le rest en attente
@@ -16,10 +17,22 @@ export default function Strategy(){
 }
 
 function SelectWithOption({refSelect,handleChange}){
+    const [Strats,setStrategy]=useState([])
+    useEffect(async()=>{
+        await fetch(ADDRSERVEURGAME+"/allStrategy",{method:'GET'}).then((response)=>{
+            if(response.ok){
+                console.log(response)
+                return response.json()
+            }
+        }).then(
+            (response)=>
+                setStrategy(response)
+        )
+    },[])
 
     return <select ref={refSelect} onChange={handleChange}>
         {
-            allStrat.map((value)=>{
+            Strats.map((value)=>{
                 return <option value={value} key={value}>{value}</option>
             })
         }
