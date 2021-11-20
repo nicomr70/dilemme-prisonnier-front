@@ -3,10 +3,24 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {Route, Routes} from "react-router";
+import {BrowserRouter} from "react-router-dom";
+import Home from "./component/Home/Home";
+import Play from "./component/Play/Play";
+import WaitLastPlayer from "./component/WaitLastPlayer/WaitLastPlayer";
 
 ReactDOM.render(
   <React.StrictMode>
-      <App/>
+      <BrowserRouter>
+          <Routes>
+            <Route  path="/" element={<App/>}/>
+              <Route path="/game/waitLastPlayer/:gameId" element={<WaitLastPlayer/>}/>
+              <Route path="/waitPlayerPlay" element={null}/>
+              <Route path="/game/:gameId/play/:playerId" element={<Play/>}/>
+              <Route path="/home/:idGame" element={<Home/>}/>
+              <Route path="/home" element={<Home/>}/>
+          </Routes>
+      </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );

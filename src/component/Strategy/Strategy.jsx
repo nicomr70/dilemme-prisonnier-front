@@ -1,14 +1,14 @@
 import React, {useEffect, useRef, useState} from 'react'
-import {ADDRSERVEUR,ADDRSERVEURGAME} from "../../App";
+import {ADDRSERVEURGAME} from "../../App";
+import {useNavigate} from "react-router-dom";
 
 
 export default function Strategy(){
     const selectRef = useRef();
-
     const handleClick = ()=>{
         console.log(selectRef.current.value)
-        //TODO ici on fait le fetch post pour envoyer un changement de strat et mettre tous le rest en attente
     }
+
     return <div>
         <SelectWithOption refSelect={selectRef}></SelectWithOption>
         <button onClick={handleClick}>Play with this Strategy</button>
@@ -18,8 +18,8 @@ export default function Strategy(){
 
 function SelectWithOption({refSelect,handleChange}){
     const [Strats,setStrategy]=useState([])
-    useEffect(async()=>{
-        await fetch(ADDRSERVEURGAME+"/allStrategy",{method:'GET'}).then((response)=>{
+    useEffect(async ()=>{
+        await fetch(ADDRSERVEURGAME+"/allStrategies",{method:'GET'}).then((response)=>{
             if(response.ok){
                 console.log(response)
                 return response.json()

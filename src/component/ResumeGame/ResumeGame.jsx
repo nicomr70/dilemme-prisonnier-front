@@ -1,64 +1,60 @@
-import React, {useEffect} from "react";
-import {ADDRSERVEUR, ADDRSERVEURGAME} from "../../App";
+import React from "react";
+import {ADDRSERVEURGAME} from "../../App";
+import {useNavigate} from "react-router-dom";
 
 export default function ResumeGame({game}){
-    const handleClick= (e)=>{
-        console.log(e)
-    }
-    useEffect(()=>{
-        const eventSource = new EventSource(ADDRSERVEURGAME+"/stream-test/id=1")
-        console.log(eventSource)
-        eventSource.onopen = (event) => {
-            console.log("connection opened")
-        }
-
-        eventSource.onmessage = (event) => {
-            console.log("result", event.data);
-        }
-
-        eventSource.onerror = (event) => {
-            console.log(event.target.readyState)
-            if (event.target.readyState === EventSource.CLOSED) {
-                console.log('eventsource closed (' + event.target.readyState + ')')
+    const navigate = useNavigate()
+    console.log(game)
+    const handleClick= async ()=>{
+        await fetch(`${ADDRSERVEURGAME}/join/gameId=${game.id}/playerName=nicolas`,{method : 'PUT'}).then((response)=>{
+            if(response.ok){
+                return response.json()
             }
-            eventSource.close();
-        }
-
-        return () => {
-            eventSource.close();
-            console.log("eventsource closed")
-        }
-
-    },[])
-
+        }).then((re)=>{
+            nbJoueurInGameFetch(game).then((r)=>{
+                alert("vous venez de rejoindre la partie "+game.id)
+                navigate(r===2 ? `/game/${game.id}/play/${re.id}` : `/game/waitLastPlayer/${game.id}`)
+            })
+        }).catch((ev)=>{
+            alert("vous n'avez pas reussi a rejoindre la partie\n raison : "+ev)
+        })
+    }
 
     return <>
-    </>
-}
-
-
-function nbJoueurinGame(game) {
-    return (game.player1!==null)+(game.player2!==null);
-}
-
-function buttonOrNot(game,{onclick}){
-    if(nbJoueurinGame(game)!==2){
-        return <button onClick={onclick}>Rejoindre la partie</button>
-    }else{
-        return null
-    }
-}
-
-/*
-* <div className="gameLineItem">
+        <div className="gameLineItem">
             <div>
                 <p>Id:<b>{game.id}</b></p>
             </div>
             <div>
-                <p>nombre joueurs : <b>{nbJoueurinGame(game)}</b></p>
+                <p>nombre joueurs : <b>{nbJoueurInGame(game)}</b></p>
             </div>
             <div>
                 {buttonOrNot(game,handleClick)}
             </div>
         </div>
-* */
+    </>
+}
+
+function nbJoueurInGame(game){
+    return (game.player1!==null)+(game.player2!==null);
+}
+
+async function nbJoueurInGameFetch(game){
+    return await fetch(ADDRSERVEURGAME+"/initialState/gameId="+game.id).then(r =>{
+        if (r.ok){
+            return r.json();
+        }
+    }).then( game =>{
+        return nbJoueurInGame(game)
+    }).catch((e)=> {
+        return 0;
+    })
+}
+
+function buttonOrNot(game,onclick){
+    if(nbJoueurInGame(game)!==2){
+        return <button onClick={onclick}>Rejoindre la partie</button>
+    }else{
+        return <button onClick={onclick} disabled>Rejoindre la partie</button>
+    }
+}

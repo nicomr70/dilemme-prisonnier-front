@@ -30,3 +30,8 @@ code {
   align-items: center;
   align-content: stretch;
 }
+
+.button_Gif {
+  height: 300px;
+  width: 300px;
+}

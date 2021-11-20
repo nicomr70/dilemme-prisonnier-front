@@ -1,27 +1,21 @@
 import './App.css';
-import React, {useEffect, useState} from 'react'
-import ButtonJeu from "./component/buttonJeu/ButtonJeu";
-import Strategy from "./component/Strategy/Strategy"
-import TableauGame from "./component/TableauGame/TableauGame";
-import CreateGame from "./component/CreateGame/CreateGame";
-import ResumeGame from "./component/ResumeGame/ResumeGame";
-import {Game} from "./component/Game/Game";
+import React from 'react'
+import {useNavigate} from "react-router-dom";
 
 export const ADDRSERVEUR="http://localhost:2200"
 export const ADDRSERVEURGAME = ADDRSERVEUR + "/game"
 
-const st= {
-    jeu : 1 ,
-    pointJ1 : 3,
-    pointJ2 : 1
-}
 
 function App() {
-
+    const navigate = useNavigate()
+    const handleClick = ()=>{
+        navigate("/home")
+    }
 
   return (
     <div className="App">
-        <Game/>
+        <h1>Bienvenue dans le jeu du dilemme du prisonnier</h1>
+        <button onClick={handleClick}>Commencer à jouer</button>
     </div>
   );
 }
