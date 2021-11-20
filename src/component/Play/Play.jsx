@@ -1,6 +1,6 @@
 import {Game} from "../Game/Game";
 import Strategy from "../Strategy/Strategy";
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect,useState} from "react";
 import {ADDRSERVEURGAME} from "../../App";
 import {useParams} from "react-router-dom";
 import Loader from "react-loader-spinner";
@@ -8,44 +8,37 @@ import Loader from "react-loader-spinner";
 
 export default function Play(){
     const {gameId,playerId} = useParams()
-    const [state,setState] = useState({load:true, enAttente : false,player :{},game:{}});
-    const load = true
-    const play = useCallback(async function playFetch(choice){
-        await fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+playerId+"/move="+choice,{method:'PUT'})
-            .then((r)=>{
-                if(r.ok) {
-                    return r.json()
-                }
-            }).then((r)=>{
-                setState({
-                    ...state,
-                    game: r,
-                    enAttente : true
-                })
-            }).catch((e)=>{
-                alert("votre coup n'a pas pu être pris en compte");
+    const [state,setState] = useState({load:true, enAttente : false,player :{}, game:{}});
+
+    const playFetch = useCallback((choice)=>{
+        setState({...state, enAttente : true})
+        return fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move="+choice,{method:'PUT'})
+            .then((r)=>console.log(r))
+            .catch((e)=>{
+                alert("votre coup n'a pas pu être pris en compte\n raison :"+e.data);
+                setState({...state,enAttente : false})
             })
-    })
+        },[]);
+
 
     useEffect(async ()=>{
-        await fetch(ADDRSERVEURGAME+"/initialState/gameId="+gameId,{method:'GET'})
-            .then(r=>{if(r.ok)return r.json()})
-            .then(r=>{
-                console.log(r);
-                setState({...state,load :false,game : r })
-            })
+        const load = () => {
+            return Promise.all([loadGame(gameId),loadPlayer(gameId,playerId)])
+                .then((values)=>{
+                    console.log(values[0])
+                    console.log(values[1])
+                    setState({...state,enAttente: false,player: values[1], game : values[0]})
+                })
+                .catch((e)=>console.log(e))
+        }
+        load();
 
-        //TODO faire le fetch pour recuperer le jeu
         const eventGame = new EventSource(ADDRSERVEURGAME+"/waitPlayerPlay/gameId="+gameId)
 
         eventGame.onopen = ()=>console.log("connexion au server ouverte")
 
         eventGame.onmessage = (g)=>{
-            console.log(g)
-            setState({...state,
-                enAttente: false,
-                game : g.data
-            })
+            setState({...state, enAttente: false, game : g.data})
         }
 
         eventGame.onerror = (e)=>{
@@ -53,15 +46,14 @@ export default function Play(){
             eventGame.close()
         }
 
-    },[load])
-
-
+    },[state.load])
 
     const handleClickDefect = async ()=>{
-        await play("DEFECT").then(()=>console.log("envoie du coup DEFECT reussi" ));
+        await playFetch("DEFECT")
+        console.log(state);
     }
     const handleClickCooperate = async ()=>{
-        await play("COOPERATE")
+        await playFetch("COOPERATE")
     }
 
 
@@ -91,3 +83,19 @@ export default function Play(){
 
     </div>
 }
+
+async function loadGame(gameId){
+    return await fetch(ADDRSERVEURGAME + "/initialState/gameId=" + gameId, {method: 'GET'})
+        .then(r => {if (r.ok) return r.json()})
+        .then(r => {return r})
+        .catch(e =>console.log(e))
+}
+
+async function loadPlayer(gameId,playerId){
+    return await fetch(ADDRSERVEURGAME + "/" + gameId + "/player/" + playerId, {method: 'GET'})
+        .then((r) => {if (r.ok) return r.json()})
+        .then((r) => {return r})
+        .catch((e) => {console.log(e)})
+}
+
+

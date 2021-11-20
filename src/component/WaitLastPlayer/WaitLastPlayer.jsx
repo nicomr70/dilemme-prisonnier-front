@@ -5,7 +5,7 @@ import {useNavigate, useParams} from "react-router-dom";
 
 export default function WaitLastPlayer(){
     const navigate = useNavigate()
-    const {gameId} = useParams()
+    const {gameId,playerId} = useParams()
 
     useEffect(()=>{
         const eventGame = new EventSource(ADDRSERVEURGAME+"/waitLastPlayer/gameId="+gameId)
@@ -14,7 +14,7 @@ export default function WaitLastPlayer(){
 
         eventGame.onmessage = (ev)=>{
             const game = JSON.parse(ev.data)
-            navigate("/game/"+gameId+"/play/"+game.id)
+            navigate("/game/"+gameId+"/play/"+playerId)
         }
 
         return ()=>{

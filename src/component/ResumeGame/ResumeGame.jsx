@@ -2,18 +2,18 @@ import React from "react";
 import {ADDRSERVEURGAME} from "../../App";
 import {useNavigate} from "react-router-dom";
 
-export default function ResumeGame({game}){
+export default function ResumeGame({game,pseudo}){
     const navigate = useNavigate()
     console.log(game)
     const handleClick= async ()=>{
-        await fetch(`${ADDRSERVEURGAME}/join/gameId=${game.id}/playerName=nicolas`,{method : 'PUT'}).then((response)=>{
+        await fetch(`${ADDRSERVEURGAME}/join/gameId=${game.id}/playerName=${pseudo}`,{method : 'PUT'}).then((response)=>{
             if(response.ok){
                 return response.json()
             }
         }).then((re)=>{
             nbJoueurInGameFetch(game).then((r)=>{
                 alert("vous venez de rejoindre la partie "+game.id)
-                navigate(r===2 ? `/game/${game.id}/play/${re.id}` : `/game/waitLastPlayer/${game.id}`)
+                navigate(r===2 ? `/game/${game.id}/play/${re.id}` : `/game/${game.id}/waitLastPlayer/${re.id}`)
             })
         }).catch((ev)=>{
             alert("vous n'avez pas reussi a rejoindre la partie\n raison : "+ev)
