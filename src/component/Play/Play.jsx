@@ -8,66 +8,64 @@ import Loader from "react-loader-spinner";
 
 export default function Play(){
     const {gameId,playerId} = useParams()
-    const [state,setState] = useState({load:true, enAttente : false,player :{}, game:{}});
+    const [state,setState] = useState({enAttente : false, player :{id : playerId}, game:{}});
 
-    const playFetch = useCallback((choice)=>{
-        setState({...state, enAttente : true})
-        return fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move="+choice,{method:'PUT'})
-            .then((r)=>console.log(r))
-            .catch((e)=>{
-                alert("votre coup n'a pas pu être pris en compte\n raison :"+e.data);
-                setState({...state,enAttente : false})
+    async function loadData(){
+        await Promise.all([loadGame(gameId),loadPlayer(gameId,playerId)])
+            .then((values)=>{
+                setState({enAttente: false,player:values[1], game :values[0]})
             })
-        },[]);
+            .catch((e)=>console.log(e))
+    }
 
-
-    useEffect(async ()=>{
-        const load = () => {
-            return Promise.all([loadGame(gameId),loadPlayer(gameId,playerId)])
-                .then((values)=>{
-                    console.log(values[0])
-                    console.log(values[1])
-                    setState({...state,enAttente: false,player: values[1], game : values[0]})
-                })
-                .catch((e)=>console.log(e))
-        }
-        load();
-
+    useEffect(()=>{
+        loadData();
         const eventGame = new EventSource(ADDRSERVEURGAME+"/waitPlayerPlay/gameId="+gameId)
-
         eventGame.onopen = ()=>console.log("connexion au server ouverte")
-
         eventGame.onmessage = (g)=>{
-            setState({...state, enAttente: false, game : g.data})
+            console.log(state)
+            const game = JSON.parse(g.data)
+            const player = game.player1===playerId ? game.player1 : game.player2
+            console.log(game)
+            console.log(player)
+            setState({enAttente: false, game :game,player: player})
+            console.log(state)
         }
-
         eventGame.onerror = (e)=>{
             alert("une erreur c'est produite avec le serveur \n raison : "+JSON.stringify(e));
             eventGame.close()
         }
+        return ()=>{
+            eventGame.close()
+        }
+    },[]);
 
-    },[state.load])
-
-    const handleClickDefect = async ()=>{
-        await playFetch("DEFECT")
-        console.log(state);
+    async function handleClickDefect(){
+        setState({game : state.game,player: state.player, enAttente : true})
+        console.log(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move=COOPERATE");
+        console.log(state)
+        await fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move=DEFECT",{method:'PUT'})
     }
-    const handleClickCooperate = async ()=>{
-        await playFetch("COOPERATE")
+
+    async function handleClickCooperate(){
+        setState({...state, enAttente : true})
+        console.log(state)
+        await fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move=COOPERATE",{method:'PUT'})
     }
 
-
+    const cooperate = useCallback(handleClickCooperate,[state])
+    const defect = useCallback(handleClickDefect,[state])
 
     return<div>
        <div hidden={state.enAttente}>
-           <Game game={state.game}></Game>
-           <button onClick={handleClickDefect}>
+           <Game game={state.game}  playerId={state.player.id}></Game>
+           <button onClick={cooperate}>
                <div>
                    <img className="button_Gif" alt="defect.gif" src="https://tenor.com/view/homer-simpson-gif-3448525.gif"/>
                    <p>Trahir</p>
                </div>
            </button>
-           <button onClick={handleClickCooperate}>
+           <button onClick={defect}>
                <div>
                    <img className="button_Gif" alt="defect.gif" src="https://tenor.com/view/the-simpsons-simpson-barny-gumble-bar-moe-sizlak-gif-3846347.gif"/>
                    <p>Cooppérer</p>
@@ -97,5 +95,3 @@ async function loadPlayer(gameId,playerId){
         .then((r) => {return r})
         .catch((e) => {console.log(e)})
 }
-
-

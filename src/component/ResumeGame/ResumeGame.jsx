@@ -4,7 +4,6 @@ import {useNavigate} from "react-router-dom";
 
 export default function ResumeGame({game,pseudo}){
     const navigate = useNavigate()
-    console.log(game)
     const handleClick= async ()=>{
         await fetch(`${ADDRSERVEURGAME}/join/gameId=${game.id}/playerName=${pseudo}`,{method : 'PUT'}).then((response)=>{
             if(response.ok){
