@@ -3,10 +3,11 @@ import {ADDRSERVEURGAME} from "../../App";
 import {useNavigate} from "react-router-dom";
 
 
-export default function Strategy(){
+export default function Strategy({setStrategy}){
     const selectRef = useRef();
-    const handleClick = ()=>{
-        console.log(selectRef.current.value)
+    const handleClick = async ()=>{
+        setStrategy(selectRef.current.value)
+
     }
 
     return <div>

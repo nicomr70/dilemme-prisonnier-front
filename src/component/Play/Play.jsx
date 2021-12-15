@@ -1,6 +1,6 @@
 import {Game} from "../Game/Game";
 import Strategy from "../Strategy/Strategy";
-import React, {useCallback, useEffect,useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {ADDRSERVEURGAME} from "../../App";
 import {useParams} from "react-router-dom";
 import Loader from "react-loader-spinner";
@@ -8,7 +8,8 @@ import Loader from "react-loader-spinner";
 
 export default function Play(){
     const {gameId,playerId} = useParams()
-    const [state,setState] = useState({enAttente : false, player :{id : playerId}, game:{}});
+    let [state,setState] = useState({enAttente : false, player :{}, game:{}});
+
 
     async function loadData(){
         await Promise.all([loadGame(gameId),loadPlayer(gameId,playerId)])
@@ -22,14 +23,9 @@ export default function Play(){
         loadData();
         const eventGame = new EventSource(ADDRSERVEURGAME+"/waitPlayerPlay/gameId="+gameId)
         eventGame.onopen = ()=>console.log("connexion au server ouverte")
-        eventGame.onmessage = (g)=>{
-            console.log(state)
-            const game = JSON.parse(g.data)
-            const player = game.player1===playerId ? game.player1 : game.player2
-            console.log(game)
-            console.log(player)
-            setState({enAttente: false, game :game,player: player})
-            console.log(state)
+        eventGame.onmessage = async (g)=>{
+            await loadData(gameId,playerId);
+            await loadPlayer(gameId,playerId)
         }
         eventGame.onerror = (e)=>{
             alert("une erreur c'est produite avec le serveur \n raison : "+JSON.stringify(e));
@@ -41,7 +37,7 @@ export default function Play(){
     },[]);
 
     async function handleClickDefect(){
-        setState({game : state.game,player: state.player, enAttente : true})
+        setState({...state,enAttente : true})
         console.log(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move=COOPERATE");
         console.log(state)
         await fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move=DEFECT",{method:'PUT'})
@@ -53,8 +49,21 @@ export default function Play(){
         await fetch(ADDRSERVEURGAME+"/play/gameId="+state.game.id+"/playerId="+state.player.id+"/move=COOPERATE",{method:'PUT'})
     }
 
+    async function setStrategy(value){
+        //TODO voir quoi envoyer pour etre sur de retrouver les strategy coter serveur
+        await fetch(ADDRSERVEURGAME+"/gameId="+state.game.id+"/playerId="+state.player.id+"/strategy="+value,{method : 'PUT'}).then(
+            r => {
+                if(r.ok){
+                    alert("vous venez de placer votre strategy vous ne pouver donc plus jouer");
+                    //envoyer sur autre page faite pour !!
+                }
+            }
+        )
+    }
+
     const cooperate = useCallback(handleClickCooperate,[state])
     const defect = useCallback(handleClickDefect,[state])
+    const setStrategyCallback = useCallback(setStrategy,[state])
 
     return<div>
        <div hidden={state.enAttente}>
@@ -73,7 +82,7 @@ export default function Play(){
            </button>
        </div>
         <div hidden={state.enAttente}>
-            <Strategy></Strategy>
+            <Strategy setStrategy={setStrategyCallback}></Strategy>
         </div>
         <div hidden={!state.enAttente}>
             <Loader type="BallTriangle" color="#00BFFF" height={80} width={80} />

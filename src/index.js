@@ -8,6 +8,7 @@ import {BrowserRouter} from "react-router-dom";
 import Home from "./component/Home/Home";
 import Play from "./component/Play/Play";
 import WaitLastPlayer from "./component/WaitLastPlayer/WaitLastPlayer";
+import FinDePartie from "./component/FinDePartie/FinDePartie";
 
 document.title="dilemme du prisonnier"
 
@@ -21,6 +22,7 @@ ReactDOM.render(
               <Route path="/game/:gameId/play/:playerId" element={<Play/>}/>
               <Route path="/home/:pseudo" element={<Home/>}/>
               <Route path="/home" element={<Home/>}/>
+              <Route path="/game/:gameId/end/:playerId" element={<FinDePartie/>}/>
           </Routes>
       </BrowserRouter>
   </React.StrictMode>,

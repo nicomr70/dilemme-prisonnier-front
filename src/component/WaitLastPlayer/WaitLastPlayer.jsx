@@ -23,7 +23,9 @@ export default function WaitLastPlayer(){
     },[])
 
     return <div>
-        <Loader type="BallTriangle" color="#00BFFF" height={80} width={80} />
+        <div>
+            <img src="https://i.gifer.com/2nd8.gif"/>
+        </div>
         <p>En attentes d'un second joueur</p>
     </div>
 }

@@ -13,9 +13,9 @@ export function Game({game,playerId}){
             <div>
                 <p>Score</p>
                 <p>{playerCurrent.name}: {playerCurrent.score}</p>
-                <p>{otherPlayer.name}: {playerCurrent.score}</p>
+                <p>{otherPlayer.name}: {otherPlayer.score}</p>
             </div>
-            {lastChoiceOtherplayer ? <p>otherPlayer.name à</p> : ""}
+            {lastChoiceOtherplayer ? <p>otherPlayer.name à jouer : lastChoiceOtherplayer</p> : ""}
         </div>
     }else{
         return null
