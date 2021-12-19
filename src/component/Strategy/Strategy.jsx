@@ -26,8 +26,9 @@ function SelectWithOption({refSelect,handleChange}){
                 return response.json()
             }
         }).then(
-            (response)=>
+            (response)=>{
                 setStrategy(response)
+            }
         )
     },[])
 

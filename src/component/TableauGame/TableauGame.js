@@ -19,8 +19,10 @@ export default function TableauGame({pseudo}){
     useEffect(()=>{
         fetchInitialGames(state,setState);
         const eventSource = new EventSource(ADDRSERVEUR+"/allGames");
+
         eventSource.onmessage = (e)=>{
-            setState({...state,games : JSON.parse(e.data)})
+            console.log("recu")
+            setState((state)=> {return {load : state.load ,games: JSON.parse(e.data)}})
         }
         eventSource.onerror =()=>{
             eventSource.close()
@@ -35,7 +37,8 @@ export default function TableauGame({pseudo}){
 
     return<div className="gameLine">
         {
-            state.games.length === 0 ? <h3>Aucune Partie à l'horizon</h3> : state.games.map((value,i)=>{return <ResumeGame pseudo={pseudo} key={value.id} game={value}></ResumeGame>})
+            state.games.length === 0 ? <h3>Aucune Partie à l'horizon</h3> : state.games.map((value,i)=>{return <ResumeGame pseudo={pseudo} key={value.id} game={value}></ResumeGame>}).reverse()
+
         }
     </div>
 }

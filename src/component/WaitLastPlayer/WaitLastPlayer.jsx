@@ -26,6 +26,6 @@ export default function WaitLastPlayer(){
         <div>
             <img src="https://i.gifer.com/2nd8.gif"/>
         </div>
-        <p>En attentes d'un second joueur</p>
+        <p>En attente d'un second joueur</p>
     </div>
 }

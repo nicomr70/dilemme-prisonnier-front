@@ -2,7 +2,7 @@ import './App.css';
 import React, {useRef} from 'react'
 import {useNavigate} from "react-router-dom";
 
-export const ADDRSERVEUR="http://localhost:2200"
+export const ADDRSERVEUR="https://dilemme-back.herokuapp.com"
 export const ADDRSERVEURGAME = ADDRSERVEUR + "/game"
 
 

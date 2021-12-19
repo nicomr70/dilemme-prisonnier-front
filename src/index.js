@@ -9,6 +9,8 @@ import Home from "./component/Home/Home";
 import Play from "./component/Play/Play";
 import WaitLastPlayer from "./component/WaitLastPlayer/WaitLastPlayer";
 import FinDePartie from "./component/FinDePartie/FinDePartie";
+import ViewGame from "./component/viewGame/ViewGame";
+import {PageNotFound} from "./component/PageNotFound/PageNotFound";
 
 document.title="dilemme du prisonnier"
 
@@ -22,7 +24,10 @@ ReactDOM.render(
               <Route path="/game/:gameId/play/:playerId" element={<Play/>}/>
               <Route path="/home/:pseudo" element={<Home/>}/>
               <Route path="/home" element={<Home/>}/>
-              <Route path="/game/:gameId/end/:playerId" element={<FinDePartie/>}/>
+              <Route path="/game/:gameId/end/:playerName" element={<FinDePartie/>}/>
+              <Route path="/game/:gameId/:playerId/viewGame" element={<ViewGame/>}/>
+              <Route path="pagenotfound/:name" element={<PageNotFound/>}/>
+              <Route path="*" element={<PageNotFound/>}/>
           </Routes>
       </BrowserRouter>
   </React.StrictMode>,
